@@ -1,16 +1,44 @@
-#Query the Western Longitude (LONG_W) for the largest Northern Latitude (LAT_N) in STATION that is less than 137.2345 . 
-Round your answer to  decimal places.
+--Query the Western Longitude (LONG_W) for the largest Northern Latitude (LAT_N) in STATION that is less than 137.2345 . 
+--Round your answer to  decimal places.
 
 SELECT ROUND(LONG_W,4)
 FROM STATION
 WHERE LAT_N IN (SELECT MAX(LAT_N) FROM STATION WHERE LAT_N < 137.2345);
 
 
-#Query the Western Longitude (LONG_W)where the smallest Northern Latitude (LAT_N) in STATION is greater than . 
-#Round your answer to  decimal places.
+--Query the Western Longitude (LONG_W)where the smallest Northern Latitude (LAT_N) in STATION is greater than . 
+--Round your answer to  decimal places.
 
 
 SELECT ROUND(LONG_W,4) 
 FROM STATION 
 WHERE LAT_N > 38.7780 
 ORDER BY LAT_N LIMIT 1;
+
+--A median is defined as a number separating the higher half of a data set from the lower half. 
+-- Query the median of the Northern Latitudes (LAT_N) from STATION and round your answer to  decimal places.
+select round(a.lat_n, 4)
+from (
+        select 
+            lat_n, 
+            percent_rank() over (order by lat_n) as percentile
+        from station
+    ) a
+where a.percentile = .5
+;
+
+
+--other ideas:
+SELECT ROUND(x.lat_n,4) FROM STATION x, STATION y
+GROUP BY x.lat_n
+HAVING SUM(SIGN(1-SIGN(y.lat_n-x.lat_n))) = (COUNT(*)+1)/2;
+
+
+WITH ORDERED AS (
+SELECT LAT_N, 
+       ROW_NUMBER() OVER (ORDER BY LAT_N) AS ROW_N,
+       COUNT(LAT_N) OVER() AS ROW_T
+FROM STATION)
+SELECT CAST(ROUND(AVG(LAT_N), 4) AS DECIMAL(10,4))
+FROM ORDERED
+WHERE ORDERED.ROW_N = CEILING((ORDERED.ROW_T+1)/2.0);
