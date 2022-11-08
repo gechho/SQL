@@ -42,3 +42,77 @@ FROM STATION)
 SELECT CAST(ROUND(AVG(LAT_N), 4) AS DECIMAL(10,4))
 FROM ORDERED
 WHERE ORDERED.ROW_N = CEILING((ORDERED.ROW_T+1)/2.0);
+
+
+--You are given two tables: Students and Grades. Students contains three columns ID, Name and Marks.
+/*
+Ketty gives Eve a task to generate a report containing three columns: Name, Grade and Mark. Ketty doesn't want the NAMES of those students who received a grade lower than 8. The report must be in descending order by grade -- i.e. higher grades are entered first. If there is more than one student with the same grade (8-10) assigned to them, order those particular students by their name alphabetically. Finally, if the grade is lower than 8, use "NULL" as their name and list them by their grades in descending order. If there is more than one student with the same grade (1-7) assigned to them, order those particular students by their marks in ascending order.
+
+Write a query to help Eve.
+
+Sample Input
+
+*/
+
+SELECT IF(Grade < 8, null, name),Grade,Mark
+FROM Students 
+JOIN Grades ON Marks BETWEEN Min_Mark AND Max_Mark
+ORDER BY Grade DESC, Name;
+
+SELECT CASE WHEN Grade > 7 THEN Name ELSE Null END, Grade, Marks 
+FROM Students s  Grades g
+WHERE Grade = (SELECT Grade FROM Grades WHERE s.Marks BETWEEN g.Min_Mark AND g.Max_Mark)
+ORDER BY Grade DESC,s.Name;
+
+
+--P(R) represents a pattern drawn by Julia in R rows. The following pattern represents P(5):
+--Write a query to print the pattern P(20).
+
+
+--*****
+
+DELIMITER // 
+CREATE PROCEDURE P(R INT) 
+BEGIN 
+    WHILE R > 0 
+    DO 
+        SELECT repeat('* ', R); 
+        SET R = R - 1; 
+    END WHILE; 
+END; //
+
+DELIMITER ;
+
+CALL P(20);
+
+/* P(R) represents a pattern drawn by Julia in R rows. The following pattern represents P(5):
+* 
+* * 
+* * * 
+* * * * 
+* * * * *
+Write a query to print the pattern P(20).*/
+DELIMITER // 
+CREATE PROCEDURE P(R INT) 
+BEGIN 
+    DECLARE N INT default 1;
+
+    WHILE N<=R 
+    DO 
+        SELECT repeat('* ', N); 
+        SET N = N + 1; 
+
+    END WHILE; 
+END; //
+
+DELIMITER ;
+
+CALL P(20);
+
+
+--OR----
+SET @number = 0;
+
+SELECT REPEAT('* ', @number := @number + 1) 
+FROM information_schema.tables
+LIMIT 20 ;
